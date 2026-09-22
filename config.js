@@ -150,6 +150,7 @@ const networks = {
   proton: {
     name: 'proton',
     desc: 'XPR',
+    alcorSlug: 'xpr',
     contract: 'alcor',
 
     baseToken: {
@@ -448,6 +449,7 @@ const networks = {
   wax: {
     name: 'wax',
     desc: 'WAX',
+    alcorSlug: 'wax',
     contract: 'alcordexmain',
     cpuPayer: 'https://wax.alcor.exchange/api/v2/cpu',
 
@@ -615,6 +617,7 @@ const networks = {
   telos: {
     name: 'telos',
     desc: 'Telos',
+    alcorSlug: 'telos',
     contract: 'eostokensdex',
 
     baseToken: {
