@@ -18,6 +18,18 @@ function floorToHour(date: Date) {
   return d
 }
 
+// Distinct values of `fields` among the documents matching `filter`.
+// Not Model.distinct: on matches its planner picks a DISTINCT_SCAN over
+// (chain, market, asker, ...) and walks the whole chain (~20s per call), while
+// a $match + $group uses the (chain, time, ...) index and takes milliseconds.
+async function distinctValues(model: any, filter: any, fields: string[]) {
+  const $group: any = { _id: null }
+  for (const field of fields) $group[field] = { $addToSet: `$${field}` }
+
+  const [row] = await model.aggregate([{ $match: filter }, { $group }])
+  return row ? fields.flatMap(field => row[field]) : []
+}
+
 // Unique accounts that matched a spot order, swapped or touched an LP position
 // in [from, to). Unique counts don't add up across buckets, so DAU has to be
 // counted over a whole day window, not summed or averaged from hourly buckets.
@@ -25,11 +37,9 @@ export async function countActiveUsers(chain: string, from: Date, to: Date) {
   const filter = { chain, time: { $gte: from, $lt: to } }
 
   const accounts = await Promise.all([
-    Match.distinct('asker', filter),
-    Match.distinct('bidder', filter),
-    Swap.distinct('sender', filter),
-    Swap.distinct('recipient', filter),
-    PositionHistory.distinct('owner', filter)
+    distinctValues(Match, filter, ['asker', 'bidder']),
+    distinctValues(Swap, filter, ['sender', 'recipient']),
+    distinctValues(PositionHistory, filter, ['owner'])
   ])
 
   return new Set(accounts.flat()).size
