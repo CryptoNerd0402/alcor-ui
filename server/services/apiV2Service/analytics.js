@@ -35,7 +35,7 @@ analytics.get('/global', cacheSeconds(0, (req, res) => {
     swapFees: { $sum: '$swapFees' },
     spotFees: { $sum: '$spotFees' },
 
-    dailyActiveUsers: { $avg: '$dailyActiveUsers' }, // TODO Make db call for resolution here
+    dailyActiveUsers: { $avg: '$dailyActiveUsers' },
 
     swapTransactions: { $sum: '$swapTransactions' },
     spotTransactions: { $sum: '$spotTransactions' },
@@ -90,7 +90,7 @@ analytics.get('/charts', cacheSeconds(360, (req, res) => {
     swapFees: { $sum: '$swapFees' },
     spotFees: { $sum: '$spotFees' },
 
-    dailyActiveUsers: { $max: '$dailyActiveUsers' }, // TODO Make db call for resolution here
+    dailyActiveUsers: { $avg: '$dailyActiveUsers' },
 
     swapTransactions: { $sum: '$swapTransactions' },
     spotTransactions: { $sum: '$spotTransactions' },
