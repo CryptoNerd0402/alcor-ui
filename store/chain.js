@@ -716,8 +716,32 @@ export const actions = {
     }
   },
 
+  // Every signature goes through here — so this is where they are counted.
+  // `contract`/`action` is the first action, `target` is who a transfer is for:
+  // together they say which feature was used.
+  async sendTransaction({ state, rootState, dispatch }, actions) {
+    const [first] = actions
+    const props = {
+      wallet: state.lastWallet,
+      chain: rootState.network.name,
+      contract: first?.account,
+      action: first?.name,
+      target: first?.name === 'transfer' ? first.data?.to : undefined,
+      actions: actions.map(a => `${a.account}::${a.name}`).join(','),
+    }
+
+    try {
+      const result = await dispatch('signAndSend', actions)
+      op.track('tx_success', props)
+      return result
+    } catch (e) {
+      op.track('tx_failed', { ...props, error: e?.message ?? String(e) })
+      throw e
+    }
+  },
+
   // TODO Relogin after check chain and relogin if possible
-  async sendTransaction(
+  async signAndSend(
     { state, rootState, dispatch, getters, commit },
     actions
   ) {
